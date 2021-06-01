@@ -32,9 +32,12 @@ exit - opuszcza program
 """
 server_services = """<<<server services>>>
 help - pokazuje dostepne rodzaje hostów
-windows - windows-server
-camera - generic-camera
-printer - generic-printer
+uptime - sprawdza jak dlugo serwer jest włączony
+cpuload - sprawdza zużycie procesora
+memusage - sprawdza zużycie pamięci
+nsclient ver - sprawdza wersję programu nsclient++
+drive space - sprawdza dostępne miejsce na dysku C:
+updates - sprawdza dostępność aktualizacji systemu Windows
 back - opuszcza sekcję definicji hostów
 exit - opuszcza program
 """
@@ -84,10 +87,13 @@ while not (option == "exit"):
 
             if option == "windows":
                 use = "windows-server"
+
             elif option == "camera":
                 use = "generic-camera"
+
             elif option == "printer":
                 use = "generic-printer"  
+                
             else: 
                 if option not in passed:
                     print('\n"'+option+'" - taki rodzaj hostów nie istnieje\n')     
@@ -109,12 +115,11 @@ while not (option == "exit"):
                         if option == "camera":
                             list.write("\thostgroups\tIPCAM\n")
                         list.write("\t}\n")
-        
+
                 list.close()
                 print("\nkonfiguracja zapisana do "+option+".txt\n")
 
     elif option == "services":
-        options = ["server","printer"]
         while not (option == "exit" or option == "back"):
             print(services)
             print("Podaj rodzaj usług do zdefiniowania: ")
@@ -122,55 +127,111 @@ while not (option == "exit"):
             os.system("CLS")
 
             if option == "server":
-                if option in options:
-                    with open(option+".txt", "w") as list:
-                        for pos in range(sheet.nrows):
-                            ipaddress = sheet.cell_value(pos,0)
-                            hostname = sheet.cell_value(pos,1)
+                options = ["uptime", "cpuload", "memusage", "nsclient ver", "drive space", "updates"]
+                while not (option == "exit" or option == "back"):
+                    print(server_services)
+                    print("Podaj usługi do zdefiniowania: ")
+                    option = input()
+                    os.system("CLS")
 
-                            list.write("define host{\n")
-                            list.write("\tuse\t\t"+use+"\n")
-                            list.write("\thost_name\t" + hostname + "\n")
-                            list.write("\talias\t\t"+hostname+"\n")
-                            list.write("\taddress\t\t"+ipaddress+"\n")
-                            if option == "printer":
-                                list.write("\thostgroups\tnetwork-printers\n")
-                                list.write("\tparents\t\tTYC-PRINT-2\n")
-                            if option == "camera":
-                                list.write("\thostgroups\tIPCAM\n")
-                            list.write("\t}\n")
+                    if option == "uptime":
+                        service = "Uptime"
+                        command = "check_nt!UPTIME"
 
-                    list.close()
-                    print("\nkonfiguracja zapisana do "+option+".txt\n")
+                    elif option == "cpuload":
+                        service = "CPU Load"
+                        command = "check_nt!CPULOAD!-l 5,80,90"
+
+                    elif option == "memusage":
+                        service = "Memory Usage"
+                        command = "check_nt!MEMUSE!-w 90 -c 95"  
+
+                    elif option == "nsclient ver":
+                        service = "NSClient++ Version"
+                        command = "check_nt!CLIENTVERSION"
+
+                    elif option == "drive space":
+                        service = "Drive Space C:\ System"
+                        command = "check_nt!USEDDISKSPACE!-l C -w 80 -c 90"
+
+                    elif option == "updates":
+                        service = "Windows Updates"
+                        command = "check_nrpe!check_updates"
+
+                    else: 
+                        if option not in passed:
+                            print('\n"'+option+'" - taka usługa nie istnieje\n')
+
+                    if option in options:
+                        with open(option+".txt", "w") as list:
+                            for pos in range(sheet.nrows):
+                                hostname = sheet.cell_value(pos,1)
+
+                                list.write("define service{\n")
+                                list.write("\tuse\t\t\tgeneric-service\n")
+                                list.write("\thost_name\t\t" + hostname + "\n")
+                                list.write("\tservice_description\t"+service+"\n")
+                                list.write("\tcheck_command\t\t"+command+"\n")
+                                list.write("\t}\n")
+
+                        list.close()
+                        print("\nkonfiguracja zapisana do server_"+option+".txt\n")
 
             elif option == "printer":
-                if option in options:
-                    with open(option+".txt", "w") as list:
-                        for pos in range(sheet.nrows):
-                            ipaddress = sheet.cell_value(pos,0)
-                            hostname = sheet.cell_value(pos,1)
-    
-                            list.write("define host{\n")
-                            list.write("\tuse\t\t"+use+"\n")
-                            list.write("\thost_name\t" + hostname + "\n")
-                            list.write("\talias\t\t"+hostname+"\n")
-                            list.write("\taddress\t\t"+ipaddress+"\n")
-                            if option == "printer":
-                                list.write("\thostgroups\tnetwork-printers\n")
-                                list.write("\tparents\t\tTYC-PRINT-2\n")
-                            if option == "camera":
-                                list.write("\thostgroups\tIPCAM\n")
-                            list.write("\t}\n")
-            
-                    list.close()
-                    print("\nkonfiguracja zapisana do "+option+".txt\n")
-                    
+                options = ["uptime", "cpuload", "memusage", "nsclient ver", "drive space", "updates"]
+                while not (option == "exit" or option == "back"):
+                    print(printer_services)
+                    print("Podaj usługi do zdefiniowania: ")
+                    option = input()
+                    os.system("CLS")
+
+                    if option == "uptime":
+                        service = "Uptime"
+                        command = "check_nt!UPTIME"
+
+                    elif option == "cpuload":
+                        service = "CPU Load"
+                        command = "check_nt!CPULOAD!-l 5,80,90"
+
+                    elif option == "memusage":
+                        service = "Memory Usage"
+                        command = "check_nt!MEMUSE!-w 90 -c 95"  
+
+                    elif option == "nsclient ver":
+                        service = "NSClient++ Version"
+                        command = "check_nt!CLIENTVERSION"
+
+                    elif option == "drive space":
+                        service = "Drive Space C:\ System"
+                        command = "check_nt!USEDDISKSPACE!-l C -w 80 -c 90"
+
+                    elif option == "updates":
+                        service = "Windows Updates"
+                        command = "check_nrpe!check_updates"
+
+                    else: 
+                        if option not in passed:
+                            print('\n"'+option+'" - taka usługa nie istnieje\n')
+
+                    if option in options:
+                        with open(option+".txt", "w") as list:
+                            for pos in range(sheet.nrows):
+                                hostname = sheet.cell_value(pos,1)
+
+                                list.write("define service{\n")
+                                list.write("\tuse\t\t\tgeneric-service\n")
+                                list.write("\thost_name\t\t" + hostname + "\n")
+                                list.write("\tservice_description\t"+service+"\n")
+                                list.write("\tcheck_command\t\t"+command+"\n")
+                                list.write("\t}\n")
+
+                        list.close()
+                        print("\nkonfiguracja zapisana do printer_"+option+".txt\n")
+
             else: 
                 if option not in passed:
                     print('\n"'+option+'" - taki rodzaj usług nie istnieje\n')     
                      
-            
-
     elif option == "ping":
         with open(option+".txt", "w") as list:
             for pos in range(sheet.nrows):
