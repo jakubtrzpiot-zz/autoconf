@@ -9,8 +9,7 @@ except ImportError:
 powershell = "C:\Windows\System32\WindowsPowerShell\\v1.0\powershell.exe"
 os.system("CLS")
 
-print("Podaj adres sieci: np. 172.16.196.0")
-netw = input()
+netw = input("Podaj adres sieci: np. 172.16.196.0: ")
 data = open("data.txt", "w")
 print("Sprawdzanie adresów: ")
 for i in tqdm(range(1, 255)):
